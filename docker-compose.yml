@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: currency-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - currency-network
+
+  currency-service:
+    build: .
+    container_name: currency-service
+    depends_on:
+      - postgres
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - currency-network
+
+volumes:
+  postgres_data:
+
+networks:
+  currency-network:
+    driver: bridge
